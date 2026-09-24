@@ -33,6 +33,41 @@ services:
       retries: 20
 
 
+  api:
+    build:
+      context: ./api
+
+    container_name: order-api
+    restart: unless-stopped
+
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+      kafka:
+        condition: service_started
+
+  nginx:
+    image: nginx:latest
+    container_name: order-nginx
+    restart: unless-stopped
+
+    ports:
+      - "8081:80"
+
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+    depends_on:
+      - api
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: order-rabbitmq
@@ -44,7 +79,7 @@ services:
 
     ports:
       - "5672:5672"
-      - "15672:15672"
+      - "15673:15672"
 
     healthcheck:
       test:
