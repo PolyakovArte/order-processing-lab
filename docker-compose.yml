@@ -97,6 +97,18 @@ services:
       kafka:
         condition: service_started
 
+  rabbit-consumer:
+    build:
+      context: ./consumers
+
+    container_name: order-rabbit-consumer
+    restart: unless-stopped
+
+    command: python -u rabbit_consumer.py
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   rabbitmq:
     image: rabbitmq:3-management
